@@ -122,17 +122,17 @@ class MDETR(nn.Module):
                             dictionnaries containing the two above keys for each decoder layer.
         """
         if not isinstance(samples, NestedTensor):
-            samples = NestedTensor.from_tensor_list(samples)
+            samples = NestedTensor.from_tensor_list(samples)  # (b, 3, H, W)
 
         if encode_and_save:
             assert memory_cache is None
-            features, pos = self.backbone(samples)
-            src, mask = features[-1].decompose()
+            features, pos = self.backbone(samples)  # [(b, hid, 25, 45)], [(b, 384, 25, 45)]
+            src, mask = features[-1].decompose()  # (b, 384, 25, 45), (b, 25, 45)
             query_embed = self.query_embed.weight
             if self.qa_dataset is not None:
                 query_embed = torch.cat([query_embed, self.qa_embed.weight], 0)
             memory_cache = self.transformer(
-                self.input_proj(src),
+                self.input_proj(src),  # (b, 256, 25, 45)
                 mask,
                 query_embed,
                 pos[-1],
@@ -187,7 +187,7 @@ class MDETR(nn.Module):
                     hs = hs[:, :, :-1]
                     out["pred_answer"] = self.answer_head(answer_embeds)
 
-            outputs_class = self.class_embed(hs)
+            outputs_class = self.class_embed(hs)  # token distribution 予測のヘッド
             outputs_coord = self.bbox_embed(hs).sigmoid()
             out.update(
                 {
@@ -657,9 +657,9 @@ class SetCriterion(nn.Module):
     def forward(self, outputs, targets, positive_map):
         """This performs the loss computation.
         Parameters:
-             outputs: dict of tensors, see the output specification of the model for the format
-             targets: list of dicts, such that len(targets) == batch_size.
-                      The expected keys in each dict depends on the losses applied, see each loss' doc
+            outputs: dict of tensors, see the output specification of the model for the format
+            targets: list of dicts, such that len(targets) == batch_size.
+                The expected keys in each dict depends on the losses applied, see each loss' doc
         """
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
 
