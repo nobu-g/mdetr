@@ -4,7 +4,7 @@ Data class for the Flickr30k entities dataset. The task considered is phrase gro
 """
 from pathlib import Path
 
-from transformers import RobertaTokenizerFast
+from transformers import AutoTokenizer
 
 from .coco import ModulatedDetection, make_coco_transforms
 
@@ -14,7 +14,6 @@ class FlickrDetection(ModulatedDetection):
 
 
 def build(image_set, args):
-
     img_dir = Path(args.flickr_img_path) / f"{image_set}"
 
     if args.GT_type == "merged":
@@ -29,7 +28,7 @@ def build(image_set, args):
     else:
         ann_file = Path(args.flickr_ann_path) / f"final_flickr_{identifier}_{image_set}.json"
 
-    tokenizer = RobertaTokenizerFast.from_pretrained(args.text_encoder_type)
+    tokenizer = AutoTokenizer.from_pretrained(args.text_encoder_type)
     dataset = FlickrDetection(
         img_dir,
         ann_file,
@@ -37,6 +36,6 @@ def build(image_set, args):
         return_masks=False,
         return_tokens=True,  # args.contrastive_align_loss,
         tokenizer=tokenizer,
-        is_train=image_set=="train"
+        is_train=image_set == "train"
     )
     return dataset

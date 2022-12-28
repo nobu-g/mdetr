@@ -14,7 +14,7 @@ from typing import List, Optional
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
-from transformers import RobertaModel, RobertaTokenizerFast
+from transformers import AutoModel, AutoTokenizer
 
 
 class Transformer(nn.Module):
@@ -51,8 +51,8 @@ class Transformer(nn.Module):
 
         self._reset_parameters()
 
-        self.tokenizer = RobertaTokenizerFast.from_pretrained(text_encoder_type)
-        self.text_encoder = RobertaModel.from_pretrained(text_encoder_type)
+        self.tokenizer = AutoTokenizer.from_pretrained(text_encoder_type)
+        self.text_encoder = AutoModel.from_pretrained(text_encoder_type)
 
         if freeze_text_encoder:
             for p in self.text_encoder.parameters():
@@ -98,9 +98,9 @@ class Transformer(nn.Module):
             if self.CLS is not None:
                 # We add a CLS token to the image, to be used for contrastive loss
 
-                CLS = self.CLS.weight.view(1, 1, -1).repeat(1, bs, 1)
+                cls = self.CLS.weight.view(1, 1, -1).repeat(1, bs, 1)
                 # Add the CLS token to the incoming features
-                src = torch.cat((CLS, src))
+                src = torch.cat((cls, src))
 
                 # Adding zeros as the first token in the sequence to be compatible with the CLS token
                 pos_embed = torch.cat((torch.zeros(1, bs, self.d_model, device=device), pos_embed))
@@ -121,28 +121,28 @@ class Transformer(nn.Module):
                 encoded_text = self.text_encoder(**tokenized)
 
                 # Transpose memory because pytorch's attention expects sequence first
-                text_memory = encoded_text.last_hidden_state.transpose(0, 1)
+                text_memory = encoded_text.last_hidden_state.transpose(0, 1)  # (n, text, thid) -> (text, b, thid)
                 # Invert attention mask that we get from huggingface because its the opposite in pytorch transformer
                 text_attention_mask = tokenized.attention_mask.ne(1).bool()
 
                 # Resize the encoder hidden states to be of the same d_model as the decoder
-                text_memory_resized = self.resizer(text_memory)
+                text_memory_resized = self.resizer(text_memory)  # (text, b, hid)
             else:
                 # The text is already encoded, use as is.
                 text_attention_mask, text_memory_resized, tokenized = text
 
             # Concat on the sequence dimension
-            src = torch.cat([src, text_memory_resized], dim=0)
+            src = torch.cat([src, text_memory_resized], dim=0)  # (img, b, hid), (text, b, hid) -> (img+text, b, hid)
             # For mask, sequence dimension is second
-            mask = torch.cat([mask, text_attention_mask], dim=1)
+            mask = torch.cat([mask, text_attention_mask], dim=1)  # (b, img), (b, text) -> (b, img+text)
             # Pad the pos_embed with 0 so that the addition will be a no-op for the text tokens
             pos_embed = torch.cat([pos_embed, torch.zeros_like(text_memory_resized)], dim=0)
 
-            img_memory = self.encoder(src, src_key_padding_mask=mask, pos=pos_embed)
+            img_memory = self.encoder(src, src_key_padding_mask=mask, pos=pos_embed)  # (img+text, b, hid)
 
-            text_memory = img_memory[-len(text_memory_resized) :]
+            text_memory = img_memory[-len(text_memory_resized):]  # (text, b, hid)
 
-            assert img_memory.shape[1] == text_memory.shape[1] == tgt.shape[1]
+            assert img_memory.shape[1] == text_memory.shape[1] == tgt.shape[1], 'batch size not identical'
             memory_cache = {
                 "text_memory_resized": text_memory_resized,
                 "text_memory": text_memory,
@@ -166,14 +166,14 @@ class Transformer(nn.Module):
             assert img_memory.shape[1] == text_memory.shape[1] == tgt.shape[1]
 
             hs = self.decoder(
-                tgt,
+                tgt,  # (bb, b, hid)
                 img_memory,
                 text_memory,
                 memory_key_padding_mask=mask,
                 text_memory_key_padding_mask=text_attention_mask,
                 pos=pos_embed,
                 query_pos=query_embed,
-            )
+            )  # (6, bb, b, hid)
             return hs.transpose(1, 2)
 
 
@@ -191,7 +191,6 @@ class TransformerEncoder(nn.Module):
         src_key_padding_mask: Optional[Tensor] = None,
         pos: Optional[Tensor] = None,
     ):
-
         output = src
 
         for layer in self.layers:
