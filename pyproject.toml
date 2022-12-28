@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "mdetr"
+version = "0.1.0"
+description = ""
+authors = ["nobu-g <ueda-n127@hotmail.co.jp>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+torch = ">=1.7.0,<1.13.0"
+torchvision = "*"
+transformers = "4.5.1"
+tokenizers = ">=0.10.1"
+tqdm = "^4.64.0"
+Cython = "^0.29.30"
+scipy = "^1.8.1"
+xmltodict = "^0.13.0"
+onnx = "^1.11.0"
+prettytable = "^3.3.0"
+submitit = "^1.4.2"
+timm = "^0.5.4"
+pycocotools = {git = "https://github.com/cocodataset/cocoapi.git", subdirectory = "PythonAPI"}
+panopticapi = {git = "https://github.com/cocodataset/panopticapi.git"}
+
+[tool.poetry.group.dev.dependencies]
+ipdb = "^0.13.9"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
