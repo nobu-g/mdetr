@@ -55,7 +55,7 @@ class Transformer(nn.Module):
         self.text_encoder = AutoModel.from_pretrained(text_encoder_type)
 
         if freeze_text_encoder:
-            for p in self.text_encoder.parameters():
+            for p in self.text_encoder.encoder.layer[:-1].parameters():
                 p.requires_grad_(False)
 
         self.expander_dropout = 0.1
