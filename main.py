@@ -16,6 +16,8 @@ import torch
 import torch.utils
 from torch.utils.data import ConcatDataset, DataLoader, DistributedSampler
 
+# torchvision よりも先に AutoTokenizer を import しないとなぜか segmentation fault が発生する
+from transformers import AutoTokenizer
 import util.dist as dist
 import util.misc as utils
 from datasets import build_dataset, get_coco_api_from_dataset
@@ -113,7 +115,14 @@ def get_args_parser():
     parser.add_argument(
         "--text_encoder_type",
         default="roberta-base",
-        choices=("roberta-base", "distilroberta-base", "roberta-large"),
+        choices=(
+            "roberta-base",
+            "distilroberta-base",
+            "roberta-large",
+            "xlm-roberta-base",
+            "xlm-roberta-large",
+            "microsoft/mdeberta-v3-base",
+        ),
     )
 
     # Backbone
@@ -261,7 +270,7 @@ def get_args_parser():
 
     parser.add_argument("--test", action="store_true", help="Whether to run evaluation on val or test set")
     parser.add_argument("--test_type", type=str, default="test", choices=("testA", "testB", "test"))
-    parser.add_argument("--output-dir", default="", help="path where to save, empty for no saving")
+    parser.add_argument("--output_dir", default="", help="path where to save, empty for no saving")
     parser.add_argument("--device", default="cuda", help="device to use for training / testing")
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--resume", default="", help="resume from checkpoint")
@@ -504,7 +513,7 @@ def main(args):
     if args.eval:
         test_stats = {}
         test_model = model_ema if model_ema is not None else model
-        for i, item in enumerate(val_tuples):
+        for item in val_tuples:
             evaluator_list = build_evaluator_list(item.base_ds, item.dataset_name)
             postprocessors = build_postprocessors(args, item.dataset_name)
             item = item._replace(evaluator_list=evaluator_list)
@@ -637,7 +646,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("DETR training and evaluation script", parents=[get_args_parser()])
-    args = parser.parse_args()
-    if args.output_dir:
-        Path(args.output_dir).mkdir(parents=True, exist_ok=True)
-    main(args)
+    _args = parser.parse_args()
+    if _args.output_dir:
+        Path(_args.output_dir).mkdir(parents=True, exist_ok=True)
+    main(_args)

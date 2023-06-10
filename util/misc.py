@@ -10,7 +10,6 @@ import subprocess
 from typing import Any, Dict, List, Optional
 
 import torch
-import torchvision
 from torch import Tensor
 
 
