@@ -10,7 +10,7 @@ python = "^3.8"
 torch = ">=1.7.0,<1.8.0"
 torchvision = "^0.8.1"
 transformers = "~4.6.0"
-tokenizers = "*"
+tokenizers = "^0.10.3"
 numpy = "~1.20.3"
 tqdm = "^4.64.0"
 Cython = "^0.29.30"
@@ -23,7 +23,8 @@ timm = "^0.4.12"
 # pycocotools = {git = "https://github.com/cocodataset/cocoapi.git", subdirectory = "PythonAPI"}
 panopticapi = {git = "https://github.com/cocodataset/panopticapi.git"}
 matplotlib = "^3.5.2"
-sentencepiece = "^0.1.97"
+sentencepiece = "^0.1.99"
+protobuf = "~3.20.3"
 
 [tool.poetry.group.dev.dependencies]
 ipdb = "^0.13.9"
