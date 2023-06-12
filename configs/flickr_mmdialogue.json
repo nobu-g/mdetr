@@ -1,6 +1,6 @@
 {
   "combine_datasets": ["flickr"],
-  "combine_datasets_val": ["flickr", "refexp"],
+  "combine_datasets_val": ["flickr"],
   "GT_type" : "separate",
   "coco_path": "data/coco",
   "refexp_ann_path": "data/mdetr_annotations",

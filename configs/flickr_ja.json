@@ -1,8 +1,11 @@
 {
   "combine_datasets": ["flickr"],
-  "combine_datasets_val": ["flickr", "refexp"],
+  "combine_datasets_val": ["flickr"],
   "GT_type" : "separate",
+  "coco_path": "data/coco",
+  "refexp_ann_path": "data/mdetr_annotations",
+  "refexp_dataset_name": "all",
   "flickr_img_path" : "data/flickr30k-images",
-  "flickr_dataset_path" : "data/flickr30k_entities",
-  "flickr_ann_path" : "data/mdetr_annotations_ja"
+  "flickr_ann_path" : "data/mdetr_annotations_ja",
+  "flickr_dataset_path" : "data/flickr30k_entities"
 }
