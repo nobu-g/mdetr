@@ -315,7 +315,7 @@ def main(args):
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
-    torch.set_deterministic(True)
+    # torch.set_deterministic(True)
 
     # Build the model
     model, criterion, contrastive_criterion, qa_criterion, weight_dict = build_model(args)
