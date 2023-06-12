@@ -146,7 +146,7 @@ def get_sentence_data(filename) -> List[Dict[str, Any]]:
 
 def get_sentence_data_ja(fn):
     # exapmle: 5:[/EN#550/clothing 赤い服]を着た4:[/EN#549/people 男]が6:[/EN#551/other 綱]を握って見守っている間に、1:[/EN#547/people 数人のクライマー]が2:[/EN#554/other 列]をなして3:[/EN#548/other 岩]をよじ登っている。
-    tag_pat = re.compile(r'\d+:\[/EN#(?P<id>\d+)(/(?P<type>[a-z]+))+ (?P<words>[^]]+)]')
+    tag_pat = re.compile(r'\d+:\[/EN#(?P<id>\d+)(/(?P<type>[A-Za-z_\-()]+))+ (?P<words>[^]]+)]')
     annotations = []
     for line in Path(fn).read_text().splitlines():
         chunks = []
@@ -193,8 +193,8 @@ def get_sentence_data_ja(fn):
 # implementation from https://github.com/kuangliu/torchcv/blob/master/torchcv/utils/box.py
 # with slight modifications
 def _box_inter_union(boxes1: np.array, boxes2: np.array) -> Tuple[np.array, np.array]:
-    area1 = box_area(boxes1)
-    area2 = box_area(boxes2)
+    area1 = box_area(torch.as_tensor(boxes1))
+    area2 = box_area(torch.as_tensor(boxes2))
 
     lt = np.maximum(boxes1[:, None, :2], boxes2[:, :2])  # [N,M,2]
     rb = np.minimum(boxes1[:, None, 2:], boxes2[:, 2:])  # [N,M,2]
@@ -302,7 +302,7 @@ def convert(
         with open(flickr_path / "Annotations" / f"{img_id}.xml") as xml_file:
             annotation = xmltodict.parse(xml_file.read())["annotation"]
 
-        anno_file = os.path.join(flickr_path, "Annotations/%d.xml" % img_id)
+        anno_file = os.path.join(flickr_path, f"Annotations/{img_id}.xml")
 
         # Parse Annotation
         root = parse(anno_file).getroot()
@@ -316,7 +316,7 @@ def convert(
             ymin = float(elem.findtext("./bndbox/ymin"))
             xmax = float(elem.findtext("./bndbox/xmax"))
             ymax = float(elem.findtext("./bndbox/ymax"))
-            assert 0 < xmin and 0 < ymin
+            assert 0 <= xmin and 0 <= ymin
 
             h = ymax - ymin
             w = xmax - xmin
