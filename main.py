@@ -111,6 +111,9 @@ def get_args_parser():
     parser.add_argument(
         "--freeze_text_encoder", action="store_true", help="Whether to freeze the weights of the text encoder"
     )
+    parser.add_argument(
+        "--skip_loading_text_encoder", action="store_true", help="Whether to skip loading the weights of the encoder"
+    )
 
     parser.add_argument(
         "--text_encoder_type",
@@ -452,9 +455,16 @@ def main(args):
         print("loading from", args.load)
         checkpoint = torch.load(args.load, map_location="cpu")
         if "model_ema" in checkpoint:
-            model_without_ddp.load_state_dict(checkpoint["model_ema"], strict=False)
+            state_dict = checkpoint["model_ema"]
         else:
-            model_without_ddp.load_state_dict(checkpoint["model"], strict=False)
+            state_dict = checkpoint["model"]
+        if args.skip_loading_text_encoder:
+            model_without_ddp.load_state_dict(
+                {k: v for k, v in state_dict.items() if not k.startswith("transformer.text_encoder")},
+                strict=False,
+            )
+        else:
+            model_without_ddp.load_state_dict(state_dict, strict=False)
 
         if args.ema:
             model_ema = deepcopy(model_without_ddp)
