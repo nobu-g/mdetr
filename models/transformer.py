@@ -59,9 +59,8 @@ class Transformer(nn.Module):
                 p.requires_grad_(False)
 
         self.expander_dropout = 0.1
-        config = self.text_encoder.config
         self.resizer = FeatureResizer(
-            input_feat_size=config.hidden_size,
+            input_feat_size=self.text_encoder.config.hidden_size,
             output_feat_size=d_model,
             dropout=self.expander_dropout,
         )
@@ -121,7 +120,8 @@ class Transformer(nn.Module):
                 encoded_text = self.text_encoder(**tokenized)
 
                 # Transpose memory because pytorch's attention expects sequence first
-                text_memory = encoded_text.last_hidden_state.transpose(0, 1)  # (n, text, thid) -> (text, b, thid)
+                # As text is not truncated, the length of the text is that of the longest text in the batch
+                text_memory = encoded_text.last_hidden_state.transpose(0, 1)  # (b, text, hid) -> (text, b, hid)
                 # Invert attention mask that we get from huggingface because its the opposite in pytorch transformer
                 text_attention_mask = tokenized.attention_mask.ne(1).bool()
 
