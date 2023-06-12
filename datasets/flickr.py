@@ -14,7 +14,6 @@ class FlickrDetection(ModulatedDetection):
 
 
 def build(image_set, args):
-    img_dir = Path(args.flickr_img_path) / f"{image_set}"
 
     if args.GT_type == "merged":
         identifier = "mergedGT"
@@ -25,8 +24,10 @@ def build(image_set, args):
 
     if args.test:
         ann_file = Path(args.flickr_ann_path) / f"final_flickr_{identifier}_test.json"
+        img_dir = Path(args.flickr_img_path) / "test"
     else:
         ann_file = Path(args.flickr_ann_path) / f"final_flickr_{identifier}_{image_set}.json"
+        img_dir = Path(args.flickr_img_path) / f"{image_set}"
 
     tokenizer = AutoTokenizer.from_pretrained(args.text_encoder_type)
     dataset = FlickrDetection(
