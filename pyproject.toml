@@ -26,6 +26,8 @@ panopticapi = {git = "https://github.com/cocodataset/panopticapi.git"}
 matplotlib = "^3.5.2"
 sentencepiece = "^0.1.99"
 protobuf = "~3.20.3"
+rhoknp = "~1.2.2"
+dataclasses-json = "^0.5.8"
 
 [tool.poetry.group.dev.dependencies]
 ipdb = "^0.13.9"
