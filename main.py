@@ -577,21 +577,16 @@ def main(args):
             model_ema=model_ema,
         )
         if args.output_dir:
-            checkpoint_paths = [output_dir / "checkpoint.pth"]
-            # extra checkpoint before LR drop and every 2 epochs
-            if (epoch + 1) % args.lr_drop == 0 or (epoch + 1) % 2 == 0:
-                checkpoint_paths.append(output_dir / f"checkpoint{epoch:04}.pth")
-            for checkpoint_path in checkpoint_paths:
-                dist.save_on_master(
-                    {
-                        "model": model_without_ddp.state_dict(),
-                        "model_ema": model_ema.state_dict() if args.ema else None,
-                        "optimizer": optimizer.state_dict(),
-                        "epoch": epoch,
-                        "args": args,
-                    },
-                    checkpoint_path,
-                )
+            dist.save_on_master(
+                {
+                    "model": model_without_ddp.state_dict(),
+                    "model_ema": model_ema.state_dict() if args.ema else None,
+                    "optimizer": optimizer.state_dict(),
+                    "epoch": epoch,
+                    "args": args,
+                },
+                output_dir / f"checkpoint_{epoch}.pth",
+            )
 
         if epoch % args.eval_skip == 0:
             test_stats = {}
@@ -636,18 +631,15 @@ def main(args):
 
             if args.output_dir and metric > best_metric:
                 best_metric = metric
-                checkpoint_paths = [output_dir / "BEST_checkpoint.pth"]
-                # extra checkpoint before LR drop and every 100 epochs
-                for checkpoint_path in checkpoint_paths:
-                    dist.save_on_master(
-                        {
-                            "model": model_without_ddp.state_dict(),
-                            "optimizer": optimizer.state_dict(),
-                            "epoch": epoch,
-                            "args": args,
-                        },
-                        checkpoint_path,
-                    )
+                dist.save_on_master(
+                    {
+                        "model": model_without_ddp.state_dict(),
+                        "optimizer": optimizer.state_dict(),
+                        "epoch": epoch,
+                        "args": args,
+                    },
+                    output_dir / "BEST_checkpoint.pth",
+                )
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
