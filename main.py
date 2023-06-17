@@ -508,6 +508,14 @@ def main(args):
                     merge_boxes=args.GT_type == "merged",
                 )
             )
+        if "mmdialogue" in dataset_name:
+            evaluator_list.append(
+                FlickrEvaluator(
+                    args.mmdialogue_dataset_path,
+                    subset="test" if args.test else "val",
+                    merge_boxes=args.GT_type == "merged",
+                )
+            )
         if "phrasecut" in dataset_name:
             evaluator_list.append(
                 PhrasecutEvaluator(

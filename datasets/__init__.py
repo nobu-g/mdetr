@@ -7,7 +7,7 @@ from .mixed import CustomCocoDetection
 from .clevr import build as build_clevr
 from .clevrref import build as build_clevrref
 from .coco import build as build_coco
-from .flickr import build as build_flickr
+from .flickr import build as build_flickr, build_mmdialogue
 from .gqa import build as build_gqa
 from .lvis import LvisDetectionBase
 from .lvis import build as build_lvis
@@ -39,6 +39,8 @@ def build_dataset(dataset_file: str, image_set: str, args):
         return build_coco(image_set, args)
     if dataset_file == "flickr":
         return build_flickr(image_set, args)
+    if dataset_file == "mmdialogue":
+        return build_mmdialogue(image_set, args)
     if dataset_file == "gqa":
         return build_gqa(image_set, args)
     if dataset_file == "lvis":

@@ -1,0 +1,14 @@
+{
+  "combine_datasets": ["flickr", "mmdialogue"],
+  "combine_datasets_val": ["flickr", "mmdialogue"],
+  "GT_type" : "separate",
+  "coco_path": "data/coco",
+  "refexp_ann_path": "data/mdetr_annotations",
+  "refexp_dataset_name": "all",
+  "mmdialogue_img_path" : "data/mmdialogue-images",
+  "mmdialogue_ann_path" : "data/mdetr_annotations_mmdialogue",
+  "mmdialogue_dataset_path" : "data/mmdialogue",
+  "flickr_img_path" : "data/flickr30k-images",
+  "flickr_ann_path" : "data/mdetr_annotations_ja",
+  "flickr_dataset_path" : "data/flickr30k_entities"
+}
