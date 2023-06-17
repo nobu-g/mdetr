@@ -73,7 +73,7 @@ def apply_mask(image, mask, color, alpha=0.5):
     return image
 
 
-def plot_results(image: ImageFile, prediction: MDETRPrediction) -> None:
+def plot_results(image: ImageFile, prediction: MDETRPrediction, confidence_threshold: float = 0.8) -> None:
     plt.figure(figsize=(16, 10))
     np_image = np.array(image)
     ax = plt.gca()
@@ -82,6 +82,8 @@ def plot_results(image: ImageFile, prediction: MDETRPrediction) -> None:
     for bounding_box in prediction.bounding_boxes:
         rect = bounding_box.rect
         score = bounding_box.confidence
+        if score < confidence_threshold:
+            continue
         label = ",".join(word for word, prob in zip(prediction.words, bounding_box.word_probs) if prob >= 0.1)
         color = colors.pop()
         ax.add_patch(plt.Rectangle((rect.x1, rect.y1), rect.w, rect.h, fill=False, color=color, linewidth=3))
@@ -117,7 +119,7 @@ def predict_mdetr(
     # standard PyTorch mean-std input image normalization
     transform = tt.Compose([tt.Resize(800), tt.ToTensor(), tt.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
-    predictions: list[MDETRPrediction] = []
+    predictions: List[MDETRPrediction] = []
     image_size = images[0].size
     assert all(im.size == image_size for im in images)
     # mean-std normalize the input image
@@ -153,14 +155,14 @@ def predict_mdetr(
             for prob, bbox, token_probs in zip(
                 probs[keep].tolist(), bboxes_scaled.tolist(), pred_logits[0, keep].softmax(dim=-1)
             ):
-                char_probs: list[float] = [0] * len(caption.text)
+                char_probs: List[float] = [0] * len(caption.text)
                 for pos, token_prob in enumerate(token_probs.tolist()):
                     try:
                         span: CharSpan = tokenized.token_to_chars(0, pos)
                     except TypeError:
                         continue
                     char_probs[span.start : span.end] = [token_prob] * (span.end - span.start)
-                word_probs: list[float] = []
+                word_probs: List[float] = []
                 char_span = CharSpan(0, 0)
                 for morpheme in caption.morphemes:
                     char_span = CharSpan(char_span.end, char_span.end + len(morpheme.text))
@@ -193,6 +195,7 @@ def main():
     parser.add_argument('--text-encoder', type=str, default='xlm-roberta-base', help='text encoder name')
     parser.add_argument('--batch-size', '--bs', type=int, default=32, help='Batch size.')
     parser.add_argument('--export-dir', type=str, help='Path to directory to export results.')
+    parser.add_argument('--plot', action='store_true', help='Plot results.')
     args = parser.parse_args()
 
     # url = "http://images.cocodataset.org/val2017/000000281759.jpg"
@@ -206,7 +209,8 @@ def main():
         caption = Jumanpp().apply_to_document(args.text)
 
     predictions = predict_mdetr(args.model, images, caption, args.backbone_name, args.text_encoder, args.batch_size)
-    # plot_results(image, predictions[0])
+    if args.plot:
+        plot_results(images[0], predictions[0])
 
     export_dir = Path(args.export_dir)
     export_dir.mkdir(exist_ok=True)
