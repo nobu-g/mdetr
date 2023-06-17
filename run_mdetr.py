@@ -73,7 +73,9 @@ def apply_mask(image, mask, color, alpha=0.5):
     return image
 
 
-def plot_results(image: ImageFile, prediction: MDETRPrediction, confidence_threshold: float = 0.8) -> None:
+def plot_results(
+    image: ImageFile, prediction: MDETRPrediction, export_dir: Path, confidence_threshold: float = 0.8
+) -> None:
     plt.figure(figsize=(16, 10))
     np_image = np.array(image)
     ax = plt.gca()
@@ -98,7 +100,7 @@ def plot_results(image: ImageFile, prediction: MDETRPrediction, confidence_thres
 
     plt.imshow(np_image)
     plt.axis('off')
-    plt.savefig('output.png')
+    plt.savefig(export_dir / 'output.png')
     plt.show()
 
 
@@ -198,6 +200,9 @@ def main():
     parser.add_argument('--plot', action='store_true', help='Plot results.')
     args = parser.parse_args()
 
+    export_dir = Path(args.export_dir)
+    export_dir.mkdir(exist_ok=True)
+
     # url = "http://images.cocodataset.org/val2017/000000281759.jpg"
     # web_image = requests.get(url, stream=True).raw
     # image = Image.open(web_image)
@@ -210,10 +215,8 @@ def main():
 
     predictions = predict_mdetr(args.model, images, caption, args.backbone_name, args.text_encoder, args.batch_size)
     if args.plot:
-        plot_results(images[0], predictions[0])
+        plot_results(images[0], predictions[0], export_dir)
 
-    export_dir = Path(args.export_dir)
-    export_dir.mkdir(exist_ok=True)
     for image_file, prediction in zip(args.image_files, predictions):
         export_dir.joinpath(f'{Path(image_file).stem}.json').write_text(prediction.to_json())
 
