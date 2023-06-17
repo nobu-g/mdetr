@@ -150,24 +150,21 @@ def get_sentence_data_ja(fn):
     annotations = []
     for line in Path(fn).read_text().splitlines():
         chunks = []
-        raw_sentence = ''
         sidx = 0
         matches: list[re.Match] = list(re.finditer(tag_pat, line))
         for match in matches:
             # chunk 前を追加
             if sidx < match.start():
                 text = line[sidx:match.start()]
-                raw_sentence += text
                 chunks.append(text)
             # match の中身を追加
-            raw_sentence += match.group('words')
             chunks.append({
                 'phrase': match.group('words'),
                 'phrase_id': match.group('id'),
                 'phrase_type': match.group('type'),
             })
             sidx = match.end()
-        raw_sentence += line[sidx:]
+        chunks.append(line[sidx:])
         sentence = ''
         phrases = []
         char_idx = 0
