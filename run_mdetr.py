@@ -101,11 +101,11 @@ def plot_results(image: ImageFile, prediction: MDETRPrediction) -> None:
 
 
 def predict_mdetr(
-    checkpoint_path: Path, images: list, caption: Document, batch_size: int = 32
+    checkpoint_path: Path, images: list, caption: Document, backbone_name: str, text_encoder: str, batch_size: int = 32
 ) -> List[MDETRPrediction]:
     if len(images) == 0:
         return []
-    model = _make_detr(backbone_name='timm_tf_efficientnet_b3_ns', text_encoder='xlm-roberta-base')
+    model = _make_detr(backbone_name=backbone_name, text_encoder=text_encoder)
     checkpoint = torch.load(str(checkpoint_path), map_location='cpu')
     model.load_state_dict(checkpoint['model'])
     if torch.cuda.is_available():
@@ -187,6 +187,10 @@ def main():
         '--text', type=str, default='5 people each holding an umbrella', help='split text to perform grounding.'
     )
     parser.add_argument('--caption-file', type=str, help='Path to Juman++ file for caption.')
+    parser.add_argument(
+        '--backbone-name', type=str, default='timm_tf_efficientnet_b3_ns', help='backbone image encoder name'
+    )
+    parser.add_argument('--text-encoder', type=str, default='xlm-roberta-base', help='text encoder name')
     parser.add_argument('--batch-size', '--bs', type=int, default=32, help='Batch size.')
     parser.add_argument('--export-dir', type=str, help='Path to directory to export results.')
     args = parser.parse_args()
@@ -201,7 +205,7 @@ def main():
     else:
         caption = Jumanpp().apply_to_document(args.text)
 
-    predictions = predict_mdetr(args.model, images, caption, args.batch_size)
+    predictions = predict_mdetr(args.model, images, caption, args.backbone_name, args.text_encoder, args.batch_size)
     # plot_results(image, predictions[0])
 
     export_dir = Path(args.export_dir)
