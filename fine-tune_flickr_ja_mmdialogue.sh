@@ -14,7 +14,7 @@ poetry run python -m torch.distributed.run --nproc_per_node="${DEVICES}" main.py
   --backbone "${IMAGE_BACKBENE}" \
   --lr_backbone 5e-5 \
   --batch_size "${BATCH_SIZE}" \
-  --epochs 3 \
-  --output_dir ./result/pretrained_b3_roberta_ja_mixed_2e_flickr_mmdialogue_3e_b8 \
+  --epochs 4 \
+  --output_dir ./result/pretrained_b3_roberta_ja_mixed_2e_flickr_mmdialogue_4e_b8 \
   --load ./result/pretrained_b3_roberta_ja_mixed_2e/checkpoint.pth \
   --num_workers 8
