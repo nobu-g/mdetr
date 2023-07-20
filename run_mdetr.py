@@ -164,7 +164,7 @@ def predict_mdetr(
                     except TypeError:
                         continue
                     char_probs[span.start : span.end] = [token_prob] * (span.end - span.start)
-                word_probs: List[float] = []
+                word_probs: List[float] = []  # 単語を構成するサブワードが持つ確率の最大値
                 char_span = CharSpan(0, 0)
                 for morpheme in caption.morphemes:
                     char_span = CharSpan(char_span.end, char_span.end + len(morpheme.text))

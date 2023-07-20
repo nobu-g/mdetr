@@ -554,7 +554,8 @@ def main(args):
             **{f"test_{k}": v for k, v in test_stats.items()},
             "n_parameters": n_parameters,
         }
-        output_dir.joinpath("eval_log.json").write_text(json.dumps(log_stats, indent=2))
+        filename = "test_log.json" if args.test else "val_log.json"
+        output_dir.joinpath(filename).write_text(json.dumps(log_stats, indent=2))
         print(log_stats)
         return
 
