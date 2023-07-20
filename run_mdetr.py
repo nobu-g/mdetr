@@ -218,7 +218,7 @@ def main():
         plot_results(images[0], predictions[0], export_dir)
 
     for image_file, prediction in zip(args.image_files, predictions):
-        export_dir.joinpath(f'{Path(image_file).stem}.json').write_text(prediction.to_json())
+        export_dir.joinpath(f'{Path(image_file).stem}.json').write_text(prediction.to_json(indent=2, ensure_ascii=False))
 
 
 if __name__ == '__main__':
