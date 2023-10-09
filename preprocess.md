@@ -40,6 +40,43 @@ $ ls data/mdetr_annotations_ja
 final_flickr_separateGT_test.json  final_flickr_separateGT_train.json  final_flickr_separateGT_val.json
 ```
 
+## Create the split files for MMDialogue (J-CRe3) dataset
+
+```shell
+$ ls data/mmdialogue/Sentences | tr -d '.txt' G -E '^(56130322|56132034|56133195|56130205|56132112|57113854|57113951|57116595|56130258)' | sort > data/mmdialogue/test.txt
+$ ls data/mmdialogue/Sentences | tr -d '.txt' G -E '^(56130295|56130204|56131998|56132024|57113485|57113968)' | sort > data/mmdialogue/val.txt
+$ difference <(ls data/mmdialogue/Sentences | tr -d '.txt') <(cat data/mmdialogue/val.txt) > train.tmp.txt
+$ difference <(cat train.tmp.txt) <(cat data/mmdialogue/test.txt) | sort > data/mmdialogue/train.txt
+$ wl -l data/mmdialogue/test.txt
+1360
+$ wl -l data/mmdialogue/val.txt
+671
+$ wl -l data/mmdialogue/train.txt
+4591
+```
+
+## Preprocess MMDialogue (J-CRe3) dataset
+
+```shell
+cd /path/to/multimodal-annotation
+mdetr_data_dir=/path/to/mdetr/data
+python src/convert_annotation_to_flickr.py -d data/dataset -k data/knp -a data/image_text_annotation --flickr-image-dir ${mdetr_data_dir}/mmdialogue-images --flickr-annotations-dir ${mdetr_data_dir}/mmdialogue/Annotations --flickr-sentences-dir ${mdetr_data_dir}/mmdialogue/Sentences --scenario-ids $(cat dialogue_table.csv | grep full | cut -d, -f1)
+```
+
+## Move image files according to the split
+
+```shell
+$ ls data/mmdialogue/test.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/test/
+$ ls data/mmdialogue/val.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/val/
+$ ls data/mmdialogue/train.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/train/
+$ ls data/mmdialogue-images/test | wc -l
+1360
+$ ls data/mmdialogue-images/val | wc -l
+671
+$ ls data/mmdialogue-images/train | wc -l
+4591
+```
+
 ## Convert MMDialogue to annotation files for MDETR
 
 ```shell
