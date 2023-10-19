@@ -86,4 +86,4 @@ $ mkdir -p data/mdetr_annotations_mmdialogue
 $ python scripts/pre-training/flickr_combined.py --flickr_path data/mmdialogue --out_path data/mdetr_annotations_mmdialogue
 $ ls data/mdetr_annotations_mmdialogue
 final_flickr_separateGT_test.json  final_flickr_separateGT_train.json  final_flickr_separateGT_val.json
-`
+```
