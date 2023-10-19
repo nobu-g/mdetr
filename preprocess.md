@@ -46,13 +46,15 @@ final_flickr_separateGT_test.json  final_flickr_separateGT_train.json  final_fli
 $ ls data/mmdialogue/Sentences | tr -d '.txt' G -E '^(56130322|56132034|56133195|56130205|56132112|57113854|57113951|57116595|56130258)' | sort > data/mmdialogue/test.txt
 $ ls data/mmdialogue/Sentences | tr -d '.txt' G -E '^(56130295|56130204|56131998|56132024|57113485|57113968)' | sort > data/mmdialogue/val.txt
 $ difference <(ls data/mmdialogue/Sentences | tr -d '.txt') <(cat data/mmdialogue/val.txt) > train.tmp.txt
-$ difference <(cat train.tmp.txt) <(cat data/mmdialogue/test.txt) | sort > data/mmdialogue/train.txt
-$ wl -l data/mmdialogue/test.txt
+$ difference <(cat train.tmp.txt) <(cat data/mmdialogue/test.txt) > train.tmp2.txt
+$ sort train.tmp2.txt > data/mmdialogue/train.txt
+$ rm train.tmp.txt train.tmp2.txt
+$ wc -l data/mmdialogue/test.txt
 1360
-$ wl -l data/mmdialogue/val.txt
+$ wc -l data/mmdialogue/val.txt
 671
-$ wl -l data/mmdialogue/train.txt
-4591
+$ wc -l data/mmdialogue/train.txt
+4893
 ```
 
 ## Preprocess MMDialogue (J-CRe3) dataset
@@ -66,15 +68,15 @@ python src/convert_annotation_to_flickr.py -d data/dataset -k data/knp -a data/i
 ## Move image files according to the split
 
 ```shell
-$ ls data/mmdialogue/test.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/test/
-$ ls data/mmdialogue/val.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/val/
-$ ls data/mmdialogue/train.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/train/
+$ cat data/mmdialogue/test.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/test/
+$ cat data/mmdialogue/val.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/val/
+$ cat data/mmdialogue/train.txt | xargs -I{} mv data/mmdialogue-images/{}.png data/mmdialogue-images/train/
 $ ls data/mmdialogue-images/test | wc -l
 1360
 $ ls data/mmdialogue-images/val | wc -l
 671
 $ ls data/mmdialogue-images/train | wc -l
-4591
+4893
 ```
 
 ## Convert MMDialogue to annotation files for MDETR
@@ -84,4 +86,4 @@ $ mkdir -p data/mdetr_annotations_mmdialogue
 $ python scripts/pre-training/flickr_combined.py --flickr_path data/mmdialogue --out_path data/mdetr_annotations_mmdialogue
 $ ls data/mdetr_annotations_mmdialogue
 final_flickr_separateGT_test.json  final_flickr_separateGT_train.json  final_flickr_separateGT_val.json
-```
+`
