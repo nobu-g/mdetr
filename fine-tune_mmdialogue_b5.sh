@@ -5,7 +5,7 @@ set -euo pipefail
 TEXT_ENCODER=xlm-roberta-base  # xlm-roberta-base or microsoft/mdeberta-v3-base
 IMAGE_BACKBENE=timm_tf_efficientnet_b5_ns
 DEVICES=4
-BATCH_SIZE=2
+BATCH_SIZE=2  # 24GB GPU memory
 
 poetry run python -m torch.distributed.run --nproc_per_node="${DEVICES}" main.py \
   --dataset_config configs/mmdialogue.json \
