@@ -3,7 +3,7 @@
 set -euo pipefail
 
 TEXT_ENCODER=xlm-roberta-base  # xlm-roberta-base or microsoft/mdeberta-v3-base
-IMAGE_BACKBENE=timm_tf_efficientnet_b3_ns
+IMAGE_BACKBENE=timm_tf_efficientnet_b5_ns
 DEVICES=2
 BATCH_SIZE=4
 
@@ -15,7 +15,8 @@ poetry run python -m torch.distributed.run --nproc_per_node="${DEVICES}" main.py
   --lr_backbone 5e-5 \
   --batch_size "${BATCH_SIZE}" \
   --epochs 2 \
-  --resume ./result/pretrained_b3_roberta_ja_mixed_2e/checkpoint.pth \
-  --output_dir ./result/pretrained_b3_roberta_ja_mixed_2e \
+  --resume ./result/pretrained_b5_roberta_ja_mixed_2e_mmdialogue_4e_b8/checkpoint_1.pth \
+  --output_dir ./result/pretrained_b5_roberta_ja_mixed_2e_mmdialogue_4e_b8 \
   --eval \
+  --test \
   --num_workers 8
