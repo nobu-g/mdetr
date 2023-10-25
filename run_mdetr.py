@@ -155,11 +155,11 @@ def predict_mdetr(
             keep: torch.Tensor = probs.ge(0.0)  # (cand)
 
             # convert boxes from [0; 1] to image scales
-            bboxes_scaled = rescale_bboxes(pred_boxes[0, keep], image_size)  # (kept, 4)
+            bboxes_scaled = rescale_bboxes(pred_box[keep], image_size)  # (kept, 4)
 
             bounding_boxes = []
             for prob, bbox, token_probs in zip(
-                probs[keep].tolist(), bboxes_scaled.tolist(), pred_logits[0, keep].softmax(dim=-1)
+                probs[keep].tolist(), bboxes_scaled.tolist(), pred_logit[keep].softmax(dim=-1)
             ):
                 char_probs: List[float] = [0] * len(caption.text)
                 for pos, token_prob in enumerate(token_probs.tolist()):
