@@ -7,12 +7,15 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 # see https://github.com/ashkamath/mdetr/blob/main/requirements.txt
-python = "^3.8"
-torch = { url = "https://download.pytorch.org/whl/cu111/torch-1.9.1%2Bcu111-cp38-cp38-linux_x86_64.whl" }
-torchvision = "^0.10.1"
+python = ">=3.8,<3.9"
+torch = [
+    { platform = "linux", url = "https://download.pytorch.org/whl/cu111/torch-1.9.1%2Bcu111-cp38-cp38-linux_x86_64.whl" },
+    { platform = "darwin", version = "^1.9.0" }
+]
+torchvision = "^0.10.0"
 transformers = "~4.6.0"
 tokenizers = "*"
-numpy = "~1.20.3"
+numpy = "~1.21.6"
 tqdm = "^4.64.0"
 Cython = "^0.29.30"
 scipy = "^1.8.1"
@@ -22,12 +25,12 @@ prettytable = "^3.3.0"
 submitit = "^1.4.2"
 timm = "^0.4.12"
 # pycocotools = {git = "https://github.com/cocodataset/cocoapi.git", subdirectory = "PythonAPI"}
-panopticapi = {git = "https://github.com/cocodataset/panopticapi.git"}
+panopticapi = { git = "https://github.com/cocodataset/panopticapi.git" }
 matplotlib = "^3.5.2"
 sentencepiece = "^0.1.99"
 protobuf = "~3.20.3"
-rhoknp = "~1.2.2"
-dataclasses-json = "^0.5.8"
+rhoknp = "~1.5.1"
+dataclasses-json = "^0.6.1"
 
 [tool.poetry.group.dev.dependencies]
 ipdb = "^0.13.9"
