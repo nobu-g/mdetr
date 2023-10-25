@@ -21,6 +21,7 @@ torch.set_grad_enabled(False)
 
 @dataclass(frozen=True, eq=True)
 class BoundingBox(CamelCaseDataClassJsonMixin):
+    image_id: str
     rect: Rectangle
     class_name: str
     confidence: float
@@ -32,6 +33,7 @@ class BoundingBox(CamelCaseDataClassJsonMixin):
 
 @dataclass(frozen=True)
 class MDETRPrediction(CamelCaseDataClassJsonMixin):
+    image_id: str
     bounding_boxes: List[BoundingBox]
     words: List[str]
 
@@ -74,7 +76,7 @@ def apply_mask(image, mask, color, alpha=0.5):
 
 
 def plot_results(
-    image: ImageFile, prediction: MDETRPrediction, export_dir: Path, confidence_threshold: float = 0.8
+    image: ImageFile, image_id: str, prediction: MDETRPrediction, export_dir: Path, confidence_threshold: float = 0.8
 ) -> None:
     plt.figure(figsize=(16, 10))
     np_image = np.array(image)
@@ -100,12 +102,12 @@ def plot_results(
 
     plt.imshow(np_image)
     plt.axis('off')
-    plt.savefig(export_dir / 'output.png')
+    plt.savefig(export_dir / f'{image_id}.png')
     plt.show()
 
 
 def predict_mdetr(
-    checkpoint_path: Path, images: list, caption: Document, backbone_name: str, text_encoder: str, batch_size: int = 32
+    checkpoint_path: Path, images: list, image_ids: List[str], caption: Document, backbone_name: str, text_encoder: str, batch_size: int = 32
 ) -> List[MDETRPrediction]:
     if len(images) == 0:
         return []
@@ -125,11 +127,12 @@ def predict_mdetr(
     image_size = images[0].size
     assert all(im.size == image_size for im in images)
     # mean-std normalize the input image
-    image_tensors = [transform(im) for im in images]
+    image_tensors: List[torch.Tensor] = [transform(im) for im in images]  # [(ch, H, W)]
     for batch_idx in range(math.ceil(len(images) / batch_size)):
         img = torch.stack(image_tensors[batch_idx * batch_size : (batch_idx + 1) * batch_size], dim=0)  # (b, ch, H, W)
         if torch.cuda.is_available():
-            img = img.cuda()
+            img = img.to('cuda')
+        img_ids = image_ids[batch_idx * batch_size : (batch_idx + 1) * batch_size]
 
         # propagate through the model
         memory_cache = model(img, [caption.text] * img.size(0), encode_and_save=True)
@@ -144,7 +147,8 @@ def predict_mdetr(
         pred_boxes: torch.Tensor = outputs['pred_boxes'].cpu()  # (b, cand, 4)
         tokenized: BatchEncoding = memory_cache['tokenized']
 
-        for pred_logit, pred_box in zip(pred_logits, pred_boxes):  # (cand, seq), (cand, 4)
+        assert len(pred_logits) == len(pred_boxes) == len(img_ids)
+        for pred_logit, pred_box, image_id in zip(pred_logits, pred_boxes, img_ids):  # (cand, seq), (cand, 4)
             # NULL ターゲットを指す確率を反転させたものが confidence
             probs: torch.Tensor = 1 - pred_logit.softmax(dim=-1)[:, -1]  # (cand)
             # keep only predictions with 0.0+ confidence
@@ -172,13 +176,20 @@ def predict_mdetr(
 
                 bounding_boxes.append(
                     BoundingBox(
+                        image_id=image_id,
                         rect=Rectangle.from_xyxy(*bbox),
                         class_name="",
                         confidence=prob,
                         word_probs=word_probs,
                     )
                 )
-            predictions.append(MDETRPrediction(bounding_boxes, [m.text for m in caption.morphemes]))
+            predictions.append(
+                MDETRPrediction(
+                    image_id=image_id,
+                    bounding_boxes=bounding_boxes,
+                    words=[m.text for m in caption.morphemes],
+                )
+            )
     return predictions
 
 
@@ -207,18 +218,25 @@ def main():
     # web_image = requests.get(url, stream=True).raw
     # image = Image.open(web_image)
 
-    images = [Image.open(image_file) for image_file in args.image_files]
+    image_files = [Path(image_file) for image_file in args.image_files]
+    images: list = [Image.open(image_file) for image_file in image_files]
+    image_ids = [image_file.stem for image_file in image_files]
+    assert len(image_ids) == len(set(image_ids)), f'Image ids must be unique: {image_ids}'
+
     if args.caption_file is not None:
         caption = Document.from_jumanpp(Path(args.caption_file).read_text())
     else:
         caption = Jumanpp().apply_to_document(args.text)
 
-    predictions = predict_mdetr(args.model, images, caption, args.backbone_name, args.text_encoder, args.batch_size)
+    predictions = predict_mdetr(
+        args.model, images, image_ids, caption, args.backbone_name, args.text_encoder, args.batch_size
+    )
     if args.plot:
-        plot_results(images[0], predictions[0], export_dir)
+        for prediction in predictions:
+            plot_results(images[image_ids.index(prediction.image_id)], prediction.image_id, prediction, export_dir)
 
-    for image_file, prediction in zip(args.image_files, predictions):
-        export_dir.joinpath(f'{Path(image_file).stem}.json').write_text(prediction.to_json(indent=2, ensure_ascii=False))
+    for prediction in predictions:
+        export_dir.joinpath(f'{prediction.image_id}.json').write_text(prediction.to_json(indent=2, ensure_ascii=False))
 
 
 if __name__ == '__main__':
