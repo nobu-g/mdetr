@@ -112,10 +112,10 @@ def predict_mdetr(
     if len(images) == 0:
         return []
     model = _make_detr(backbone_name=backbone_name, text_encoder=text_encoder)
-    checkpoint = torch.load(str(checkpoint_path), map_location='cpu')
+    device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+    checkpoint = torch.load(str(checkpoint_path), map_location=device)
     model.load_state_dict(checkpoint['model'])
-    if torch.cuda.is_available():
-        model = model.cuda()
+    model = model.to(device)
     model.eval()
 
     assert caption.is_jumanpp_required() is False
@@ -130,8 +130,7 @@ def predict_mdetr(
     image_tensors: List[torch.Tensor] = [transform(im) for im in images]  # [(ch, H, W)]
     for batch_idx in range(math.ceil(len(images) / batch_size)):
         img = torch.stack(image_tensors[batch_idx * batch_size : (batch_idx + 1) * batch_size], dim=0)  # (b, ch, H, W)
-        if torch.cuda.is_available():
-            img = img.to('cuda')
+        img = img.to(device)
         img_ids = image_ids[batch_idx * batch_size : (batch_idx + 1) * batch_size]
 
         # propagate through the model
@@ -142,7 +141,8 @@ def predict_mdetr(
         # proj_queries: (b, cand, 64)
         # proj_tokens: (b, 28, 64)
         # tokenized: BatchEncoding
-        outputs: dict = model(img, [caption.text] * img.size(0), encode_and_save=False, memory_cache=memory_cache)
+        with torch.no_grad():
+            outputs: dict = model(img, [caption.text] * img.size(0), encode_and_save=False, memory_cache=memory_cache)
         pred_logits: torch.Tensor = outputs['pred_logits'].cpu()  # (b, cand, seq)
         pred_boxes: torch.Tensor = outputs['pred_boxes'].cpu()  # (b, cand, 4)
         tokenized: BatchEncoding = memory_cache['tokenized']
