@@ -116,7 +116,7 @@ def predict_mdetr(
         model = model.cuda()
     model.eval()
 
-    assert caption.need_jumanpp is False
+    assert caption.is_jumanpp_required() is False
 
     # standard PyTorch mean-std input image normalization
     transform = tt.Compose([tt.Resize(800), tt.ToTensor(), tt.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
@@ -145,10 +145,10 @@ def predict_mdetr(
         tokenized: BatchEncoding = memory_cache['tokenized']
 
         for pred_logit, pred_box in zip(pred_logits, pred_boxes):  # (cand, seq), (cand, 4)
-            # keep only predictions with 0.0+ confidence
-            # -1: no text
+            # NULL ターゲットを指す確率を反転させたものが confidence
             probs: torch.Tensor = 1 - pred_logit.softmax(dim=-1)[:, -1]  # (cand)
-            keep: torch.Tensor = probs >= 0.0  # (cand)
+            # keep only predictions with 0.0+ confidence
+            keep: torch.Tensor = probs.ge(0.0)  # (cand)
 
             # convert boxes from [0; 1] to image scales
             bboxes_scaled = rescale_bboxes(pred_boxes[0, keep], image_size)  # (kept, 4)

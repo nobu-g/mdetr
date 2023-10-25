@@ -188,11 +188,11 @@ class MDETR(nn.Module):
                     out["pred_answer"] = self.answer_head(answer_embeds)
 
             outputs_class = self.class_embed(hs)  # token distribution 予測のヘッド
-            outputs_coord = self.bbox_embed(hs).sigmoid()
+            outputs_coord = self.bbox_embed(hs).sigmoid()  # bounding box 座標の予測ヘッド
             out.update(
                 {
-                    "pred_logits": outputs_class[-1],
-                    "pred_boxes": outputs_coord[-1],
+                    "pred_logits": outputs_class[-1],  # (b, cand, seq)
+                    "pred_boxes": outputs_coord[-1],  # (b, cand, 4)
                 }
             )
             outputs_isfinal = None
