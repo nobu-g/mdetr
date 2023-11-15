@@ -33,6 +33,7 @@ class BoundingBox(CamelCaseDataClassJsonMixin):
 
 @dataclass(frozen=True)
 class MDETRPrediction(CamelCaseDataClassJsonMixin):
+    doc_id: str
     image_id: str
     bounding_boxes: List[BoundingBox]
     words: List[str]
@@ -185,6 +186,7 @@ def predict_mdetr(
                 )
             predictions.append(
                 MDETRPrediction(
+                    doc_id=caption.doc_id,
                     image_id=image_id,
                     bounding_boxes=bounding_boxes,
                     words=[m.text for m in caption.morphemes],
