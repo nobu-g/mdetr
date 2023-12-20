@@ -144,14 +144,14 @@ def get_sentence_data(filename) -> List[Dict[str, Any]]:
     return annotations
 
 
-def get_sentence_data_ja(sentence_file: Path):
+def get_sentence_data_ja(sentence_file: Path) -> List[dict]:
     # exapmle: 5:[/EN#550/clothing 赤い服]を着た4:[/EN#549/people 男]が6:[/EN#551/other 綱]を握って見守っている間に、1:[/EN#547/people 数人のクライマー]が2:[/EN#554/other 列]をなして3:[/EN#548/other 岩]をよじ登っている。
     tag_pat = re.compile(r'\d+:\[/EN#(?P<id>\d+)(/(?P<type>[A-Za-z_\-()]+))+ (?P<words>[^]]+)]')
     annotations = []
     for line in sentence_file.read_text().splitlines():
         chunks = []
         sidx = 0
-        matches: list[re.Match] = list(re.finditer(tag_pat, line))
+        matches: List[re.Match] = list(re.finditer(tag_pat, line))
         for match in matches:
             # chunk 前を追加
             if sidx < match.start():
@@ -164,7 +164,9 @@ def get_sentence_data_ja(sentence_file: Path):
                 'phrase_type': match.group('type'),
             })
             sidx = match.end()
-        chunks.append(line[sidx:])
+        # chunk 後を追加
+        if sidx < len(line):
+            chunks.append(line[sidx:])
         sentence = ''
         phrases = []
         char_idx = 0
