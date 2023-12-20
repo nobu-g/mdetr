@@ -111,7 +111,7 @@ def get_canonical_spans(orig_spans: List[List[Tuple[int, int]]], orig_caption: s
                 beg, end = new_spans[i][j]
                 if span_intersect_span(new_spans[i][j], (old_beg, old_end)):
                     if not (new_spans[i][j][0] <= old_beg < old_end <= new_spans[i][j][1]):
-                        raise PreprocessError(f"deleted spans should be contained in known span")
+                        raise PreprocessError("deleted spans should be contained in known span")
                     assert (
                         new_spans[i][j][0] <= old_beg < old_end <= new_spans[i][j][1]
                     ), "deleted spans should be contained in known span"

@@ -1,6 +1,6 @@
 # Copyright (c) Aishwarya Kamath & Nicolas Carion. Licensed under the Apache License 2.0. All Rights Reserved
 import json
-from typing import Any, List, NamedTuple, Optional, Tuple
+from typing import List, NamedTuple, Tuple
 
 
 class Annotation(NamedTuple):
@@ -29,7 +29,7 @@ def convert2dataset_combined(
     output_path,
 ):
     """"""
-    print(f"Dumping combined coco and vg images related all training examples...")
+    print("Dumping combined coco and vg images related all training examples...")
     next_img_id = 0
     next_id = 0
 
@@ -99,6 +99,6 @@ def convert2dataset_combined(
         images.append(cur_img)
 
     ds = {"info": [], "licenses": [], "images": images, "annotations": annotations, "categories": []}
-    with open(output_path / f"final_mixed_train.json", "w") as j_file:
+    with open(output_path / "final_mixed_train.json", "w") as j_file:
         json.dump(ds, j_file)
     return next_img_id, next_id

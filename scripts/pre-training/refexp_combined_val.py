@@ -110,7 +110,7 @@ def convert(dataset_path: Path, split: str, output_path, coco_path, next_img_id:
         "annotations": annotations,
         "categories": coco_annotations["categories"],
     }
-    with open(output_path / f"final_refexp_val.json", "w") as j_file:
+    with open(output_path / "final_refexp_val.json", "w") as j_file:
         json.dump(ds, j_file)
     return next_img_id, next_id
 

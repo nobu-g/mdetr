@@ -9,7 +9,6 @@ vg_img_data_path : path to image info for VG images to be downloaded from https:
 import argparse
 import json
 import os
-import pickle
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -195,7 +194,7 @@ def convert(split, data_path, sg_path, output_path, imid2data):
             images.append(cur_img)
 
     ds = {"info": [], "licenses": [], "images": images, "annotations": annotations, "categories": []}
-    with open(output_path / f"final_gqa_val.json", "w") as j_file:
+    with open(output_path / "final_gqa_val.json", "w") as j_file:
         json.dump(ds, j_file)
     return next_img_id, next_id
 

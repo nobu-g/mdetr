@@ -8,13 +8,9 @@ It outputs the dataset in coco format.
 import argparse
 import json
 import os
-import random
-import re
-from collections import Counter, defaultdict
 from pathlib import Path
 
 from .lvis_coco_format import get_subset
-from tqdm import tqdm
 
 
 def parse_args():

@@ -144,11 +144,11 @@ def get_sentence_data(filename) -> List[Dict[str, Any]]:
     return annotations
 
 
-def get_sentence_data_ja(fn):
+def get_sentence_data_ja(sentence_file: Path):
     # exapmle: 5:[/EN#550/clothing 赤い服]を着た4:[/EN#549/people 男]が6:[/EN#551/other 綱]を握って見守っている間に、1:[/EN#547/people 数人のクライマー]が2:[/EN#554/other 列]をなして3:[/EN#548/other 岩]をよじ登っている。
     tag_pat = re.compile(r'\d+:\[/EN#(?P<id>\d+)(/(?P<type>[A-Za-z_\-()]+))+ (?P<words>[^]]+)]')
     annotations = []
-    for line in Path(fn).read_text().splitlines():
+    for line in sentence_file.read_text().splitlines():
         chunks = []
         sidx = 0
         matches: list[re.Match] = list(re.finditer(tag_pat, line))
@@ -323,7 +323,7 @@ def convert(
             for name in elem.findall("name"):
                 entity_id = int(name.text)
                 assert 0 < entity_id
-                if not entity_id in target_bboxes:
+                if entity_id not in target_bboxes:
                     target_bboxes[entity_id] = []
                 else:
                     multibox_entity_count += 1

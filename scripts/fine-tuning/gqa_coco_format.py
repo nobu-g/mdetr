@@ -10,7 +10,6 @@ vg_img_data_path : path to image info for VG images to be downloaded from https:
 import argparse
 import json
 import os
-import pickle
 import re
 from collections import defaultdict
 from pathlib import Path

@@ -21,12 +21,10 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 import main as detection
 import util.dist as dist
 import util.misc as utils
-from datasets import build_dataset, get_coco_api_from_dataset
+from datasets import build_dataset
 from datasets.lvis_eval import LvisDumper, LvisEvaluatorFixedAP
-from engine import evaluate
 from models import build_model
 from models.postprocessors import build_postprocessors
-from util.metrics import MetricLogger
 
 
 def get_args_parser():
