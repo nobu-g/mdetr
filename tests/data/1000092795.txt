@@ -1,0 +1,5 @@
+2:[/EN#2/bodyparts ボサボサ髪]の1:[/EN#1/people ２人の若い男]が、4:[/EN#8/scene 庭]をうろつきながら3:[/EN#3/bodyparts 手]に視線を向けている。
+1:[/EN#1/people ２人の若者で白人男性]が、外の、2:[/EN#4/scene 低木の茂み]の近くにいる。
+2:[/EN#5/clothing 緑のシャツ]を着た1:[/EN#1/people ２人の男]が3:[/EN#9/scene 庭]に立っている。
+2:[/EN#7/clothing 青いシャツ]を着て、3:[/EN#9/scene 庭]に立っている1:[/EN#6/people 男]。
+1:[/EN#1/people ２人の友だち]が一緒に過ごす2:[/EN#10/other 時]を楽しむ。
