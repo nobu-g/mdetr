@@ -284,7 +284,7 @@ def convert(
 ):
 
     with open(flickr_path / f"{subset}.txt") as fd:
-        ids = [int(l.strip()) for l in fd]
+        ids = [line.strip() for line in fd]
 
     multibox_entity_count = 0
 
