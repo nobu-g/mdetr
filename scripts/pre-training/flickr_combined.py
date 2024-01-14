@@ -385,7 +385,7 @@ def convert(
                 "dataset_name": "flickr",
                 "tokens_negative": [(0, len(sentence))],
                 "sentence_id": sent_id,
-                "original_img_id": img_id,
+                "original_img_id": int(img_id),
                 "tokens_positive_eval": tokens_positive_eval,
             }
 
