@@ -52,9 +52,9 @@ $ rm train.tmp.txt train.tmp2.txt
 $ wc -l data/mmdialogue/test.txt
 1360
 $ wc -l data/mmdialogue/val.txt
-671
+922
 $ wc -l data/mmdialogue/train.txt
-7853
+8686
 ```
 
 ## Preprocess MMDialogue (J-CRe3) dataset
@@ -74,9 +74,9 @@ $ cat data/mmdialogue/train.txt | xargs -I{} mv data/mmdialogue-images/{}.png da
 $ ls data/mmdialogue-images/test | wc -l
 1360
 $ ls data/mmdialogue-images/val | wc -l
-671
+922
 $ ls data/mmdialogue-images/train | wc -l
-7853
+8686
 ```
 
 ## Convert MMDialogue to annotation files for MDETR
